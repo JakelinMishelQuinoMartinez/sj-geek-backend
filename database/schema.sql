@@ -167,3 +167,9 @@ CREATE TABLE contenido_estadisticas (
     CONSTRAINT fk_est_contenido FOREIGN KEY (contenido_id)
         REFERENCES contenidos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Cada contenido nuevo nace con su fila de estadísticas en cero.
+CREATE TRIGGER trg_contenidos_crear_estadisticas
+AFTER INSERT ON contenidos
+FOR EACH ROW
+INSERT INTO contenido_estadisticas (contenido_id) VALUES (NEW.id);
