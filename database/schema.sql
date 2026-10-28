@@ -190,3 +190,14 @@ CREATE TABLE contenido_actores (
     CONSTRAINT fk_ca_persona FOREIGN KEY (persona_id)
         REFERENCES personas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE contenido_directores (
+    contenido_id INT UNSIGNED NOT NULL,
+    persona_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (contenido_id, persona_id),
+    INDEX idx_cd_persona (persona_id),
+    CONSTRAINT fk_cd_contenido FOREIGN KEY (contenido_id)
+        REFERENCES contenidos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cd_persona FOREIGN KEY (persona_id)
+        REFERENCES personas(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
