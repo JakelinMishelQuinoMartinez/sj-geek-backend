@@ -21,3 +21,13 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Aventura',     'Viajes, exploración y misiones'),
 ('Misterio',     'Intriga e investigación'),
 ('Romance',      'Historias de amor');
+
+INSERT INTO paises (nombre, codigo_iso) VALUES
+('Estados Unidos', 'US'),
+('Japón',          'JP'),
+('Canadá',         'CA'),
+('Reino Unido',    'GB'),
+('México',         'MX'),
+('España',         'ES'),
+('Corea del Sur',  'KR'),
+('Guatemala',      'GT');
