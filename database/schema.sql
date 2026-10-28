@@ -17,3 +17,9 @@ CREATE TABLE roles (
     descripcion VARCHAR(150) DEFAULT NULL,
     CONSTRAINT uk_roles_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB;
+
+CREATE TABLE tipos_contenido (
+    id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL,
+    CONSTRAINT uk_tipos_nombre UNIQUE (nombre)
+) ENGINE=InnoDB;
