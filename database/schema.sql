@@ -31,3 +31,11 @@ CREATE TABLE categorias (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_categorias_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB;
+
+CREATE TABLE paises (
+    id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(80) NOT NULL,
+    codigo_iso CHAR(2) NOT NULL,
+    CONSTRAINT uk_paises_nombre UNIQUE (nombre),
+    CONSTRAINT uk_paises_iso UNIQUE (codigo_iso)
+) ENGINE=InnoDB;
