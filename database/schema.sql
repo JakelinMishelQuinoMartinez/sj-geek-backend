@@ -173,3 +173,20 @@ CREATE TRIGGER trg_contenidos_crear_estadisticas
 AFTER INSERT ON contenidos
 FOR EACH ROW
 INSERT INTO contenido_estadisticas (contenido_id) VALUES (NEW.id);
+
+-- =========================================================================
+-- TABLAS PUENTE (reparto y dirección son hechos independientes)
+-- =========================================================================
+CREATE TABLE contenido_actores (
+    contenido_id INT UNSIGNED NOT NULL,
+    persona_id INT UNSIGNED NOT NULL,
+    personaje VARCHAR(120) NOT NULL DEFAULT 'Desconocido',
+    es_principal TINYINT(1) NOT NULL DEFAULT 0,
+    orden TINYINT UNSIGNED DEFAULT NULL,          -- orden de aparición en créditos
+    PRIMARY KEY (contenido_id, persona_id, personaje),
+    INDEX idx_ca_persona (persona_id),
+    CONSTRAINT fk_ca_contenido FOREIGN KEY (contenido_id)
+        REFERENCES contenidos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ca_persona FOREIGN KEY (persona_id)
+        REFERENCES personas(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
