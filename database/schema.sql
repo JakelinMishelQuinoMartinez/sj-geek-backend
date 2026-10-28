@@ -87,17 +87,20 @@ CREATE TABLE contenidos (
     duracion_minutos SMALLINT UNSIGNED DEFAULT NULL,
     imagen_url VARCHAR(255) DEFAULT NULL,
     estado ENUM('PENDIENTE', 'APROBADO', 'RECHAZADO') NOT NULL DEFAULT 'PENDIENTE',
+    motivo_rechazo VARCHAR(255) DEFAULT NULL,     -- solo con estado RECHAZADO
     usuario_id INT UNSIGNED NOT NULL,             -- quien lo propuso
     revisado_por INT UNSIGNED DEFAULT NULL,       -- ADMIN que aprobó o rechazó
     revisado_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT uk_contenidos_titulo UNIQUE (titulo),
+    CONSTRAINT uk_contenidos_titulo_tipo_anio UNIQUE (titulo, tipo_id, anio),
     CONSTRAINT chk_contenidos_anio CHECK (anio BETWEEN 1888 AND 2100),
     CONSTRAINT chk_contenidos_duracion CHECK (duracion_minutos IS NULL OR duracion_minutos > 0),
+    CONSTRAINT chk_contenidos_motivo CHECK (estado = 'RECHAZADO' OR motivo_rechazo IS NULL),
     INDEX idx_contenidos_cat_estado (categoria_id, estado),
-    INDEX idx_contenidos_tipo (tipo_id),
+    INDEX idx_contenidos_tipo_estado (tipo_id, estado),
     INDEX idx_contenidos_estado_fecha (estado, created_at),
+    FULLTEXT KEY ft_contenidos_busqueda (titulo, sinopsis),
     CONSTRAINT fk_contenidos_categoria FOREIGN KEY (categoria_id)
         REFERENCES categorias(id) ON DELETE RESTRICT,
     CONSTRAINT fk_contenidos_tipo FOREIGN KEY (tipo_id)
@@ -109,6 +112,33 @@ CREATE TABLE contenidos (
 ) ENGINE=InnoDB;
 
 -- =========================================================================
+-- TRÁILERS
+-- =========================================================================
+CREATE TABLE contenido_trailers (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    contenido_id INT UNSIGNED NOT NULL,
+    plataforma ENUM('YOUTUBE', 'VIMEO') NOT NULL,
+    video_key VARCHAR(20) NOT NULL,
+    titulo VARCHAR(150) DEFAULT NULL,             -- p. ej. "Tráiler oficial subtitulado"
+    tipo ENUM('TRAILER', 'TEASER', 'CLIP') NOT NULL DEFAULT 'TRAILER',
+    idioma CHAR(2) DEFAULT NULL,                  -- ISO 639-1: es, en, ja
+    es_principal TINYINT(1) NULL DEFAULT NULL,    -- 1 = principal, NULL = secundario
+    usuario_id INT UNSIGNED NOT NULL,             -- quien lo agregó
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_trailers_video UNIQUE (contenido_id, plataforma, video_key),
+    CONSTRAINT uk_trailers_principal UNIQUE (contenido_id, es_principal),
+    CONSTRAINT chk_trailers_principal CHECK (es_principal IS NULL OR es_principal = 1),
+    CONSTRAINT chk_trailers_video_key CHECK (
+        (plataforma = 'YOUTUBE' AND video_key REGEXP '^[A-Za-z0-9_-]{11}$')
+        OR (plataforma = 'VIMEO' AND video_key REGEXP '^[0-9]{6,12}$')
+    ),
+    CONSTRAINT fk_trailers_contenido FOREIGN KEY (contenido_id)
+        REFERENCES contenidos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_trailers_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =========================================================================
 -- RESEÑAS
 -- Una reseña por usuario y contenido. Los usuarios no se borran (RESTRICT)
 -- para no desincronizar contenido_estadisticas; se desactivan.
@@ -117,7 +147,7 @@ CREATE TABLE resenas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     contenido_id INT UNSIGNED NOT NULL,
     usuario_id INT UNSIGNED NOT NULL,
-    titulo_resena VARCHAR(150) DEFAULT NULL,
+    titulo_resena VARCHAR(120) NOT NULL,
     comentario TEXT NOT NULL,
     rating TINYINT UNSIGNED NOT NULL,
     es_recomendada TINYINT(1) GENERATED ALWAYS AS (IF(rating >= 6, 1, 0)) STORED,
@@ -164,6 +194,8 @@ CREATE TABLE contenido_estadisticas (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT chk_est_recomendadas CHECK (total_recomendadas <= total_votos),
     CONSTRAINT chk_est_suma CHECK (suma_ratings >= total_votos AND suma_ratings <= total_votos * 10),
+    INDEX idx_est_votos (total_votos),            -- orden por popularidad
+    INDEX idx_est_promedio (rating_promedio),     -- orden por promedio simple
     CONSTRAINT fk_est_contenido FOREIGN KEY (contenido_id)
         REFERENCES contenidos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
