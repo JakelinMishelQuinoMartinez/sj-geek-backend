@@ -201,3 +201,14 @@ CREATE TABLE contenido_directores (
     CONSTRAINT fk_cd_persona FOREIGN KEY (persona_id)
         REFERENCES personas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- VISTAS PARA EL RANKING (insumos de bayesianCalculator.js)
+-- =========================================================================
+CREATE VIEW v_reacciones_por_contenido AS
+SELECT r.contenido_id,
+       SUM(rr.tipo = 'LIKE')    AS likes,
+       SUM(rr.tipo = 'DISLIKE') AS dislikes
+FROM resenas r
+JOIN reaccion_resenas rr ON rr.resena_id = r.id
+GROUP BY r.contenido_id;
