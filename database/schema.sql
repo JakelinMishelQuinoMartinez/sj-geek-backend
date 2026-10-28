@@ -39,3 +39,21 @@ CREATE TABLE paises (
     CONSTRAINT uk_paises_nombre UNIQUE (nombre),
     CONSTRAINT uk_paises_iso UNIQUE (codigo_iso)
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- USUARIOS
+-- =========================================================================
+CREATE TABLE usuarios (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    rol_id TINYINT UNSIGNED NOT NULL DEFAULT 2,   -- 2 = USER (ver seeds de roles)
+    avatar_url VARCHAR(255) DEFAULT NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uk_usuarios_email UNIQUE (email),
+    CONSTRAINT fk_usuarios_rol FOREIGN KEY (rol_id)
+        REFERENCES roles(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
