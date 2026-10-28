@@ -107,3 +107,27 @@ CREATE TABLE contenidos (
     CONSTRAINT fk_contenidos_revisor FOREIGN KEY (revisado_por)
         REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- RESEÑAS
+-- Una reseña por usuario y contenido. Los usuarios no se borran (RESTRICT)
+-- para no desincronizar contenido_estadisticas; se desactivan.
+-- =========================================================================
+CREATE TABLE resenas (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    contenido_id INT UNSIGNED NOT NULL,
+    usuario_id INT UNSIGNED NOT NULL,
+    titulo_resena VARCHAR(150) DEFAULT NULL,
+    comentario TEXT NOT NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    es_recomendada TINYINT(1) GENERATED ALWAYS AS (IF(rating >= 6, 1, 0)) STORED,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_resenas_rating CHECK (rating BETWEEN 1 AND 10),
+    CONSTRAINT uk_resenas_usuario_contenido UNIQUE (usuario_id, contenido_id),
+    INDEX idx_resenas_contenido_fecha (contenido_id, created_at),
+    CONSTRAINT fk_resenas_contenido FOREIGN KEY (contenido_id)
+        REFERENCES contenidos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_resenas_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
