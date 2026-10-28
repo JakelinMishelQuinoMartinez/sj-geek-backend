@@ -212,3 +212,17 @@ SELECT r.contenido_id,
 FROM resenas r
 JOIN reaccion_resenas rr ON rr.resena_id = r.id
 GROUP BY r.contenido_id;
+
+CREATE VIEW v_ranking_base AS
+SELECT c.id AS contenido_id,
+       c.titulo,
+       COUNT(r.id) AS total_votos,
+       SUM(r.rating * POW(0.5, DATEDIFF(CURRENT_DATE, r.created_at) / 180))
+         / SUM(POW(0.5, DATEDIFF(CURRENT_DATE, r.created_at) / 180)) AS rating_ponderado,
+       COALESCE(x.likes, 0)    AS likes,
+       COALESCE(x.dislikes, 0) AS dislikes
+FROM contenidos c
+JOIN resenas r ON r.contenido_id = c.id
+LEFT JOIN v_reacciones_por_contenido x ON x.contenido_id = c.id
+WHERE c.estado = 'APROBADO'
+GROUP BY c.id, c.titulo, x.likes, x.dislikes;
