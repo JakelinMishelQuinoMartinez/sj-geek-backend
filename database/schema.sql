@@ -23,3 +23,11 @@ CREATE TABLE tipos_contenido (
     nombre VARCHAR(30) NOT NULL,
     CONSTRAINT uk_tipos_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB;
+
+CREATE TABLE categorias (
+    id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_categorias_nombre UNIQUE (nombre)
+) ENGINE=InnoDB;
