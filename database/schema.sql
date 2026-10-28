@@ -237,24 +237,35 @@ CREATE TABLE contenido_directores (
 -- =========================================================================
 -- VISTAS PARA EL RANKING (insumos de bayesianCalculator.js)
 -- =========================================================================
-CREATE VIEW v_reacciones_por_contenido AS
+CREATE VIEW v_reacciones_por_resena AS
+SELECT rr.resena_id,
+       CAST(SUM(rr.tipo = 'LIKE')    AS SIGNED) AS likes,
+       CAST(SUM(rr.tipo = 'DISLIKE') AS SIGNED) AS dislikes
+FROM reaccion_resenas rr
+GROUP BY rr.resena_id;
+
+CREATE VIEW v_resenas_ranking AS
 SELECT r.contenido_id,
-       SUM(rr.tipo = 'LIKE')    AS likes,
-       SUM(rr.tipo = 'DISLIKE') AS dislikes
+       r.id AS resena_id,
+       r.rating,
+       COALESCE(x.likes, 0)    AS likes,
+       COALESCE(x.dislikes, 0) AS dislikes,
+       DATEDIFF(CURRENT_DATE, r.created_at) AS edad_dias,
+       GREATEST(0.25, POW(0.5, DATEDIFF(CURRENT_DATE, r.created_at) / 180))
+         * (1 + LEAST(0.5, GREATEST(-0.5,
+              (COALESCE(x.likes, 0) - COALESCE(x.dislikes, 0))
+              / (COALESCE(x.likes, 0) + COALESCE(x.dislikes, 0) + 1)))) AS peso
 FROM resenas r
-JOIN reaccion_resenas rr ON rr.resena_id = r.id
-GROUP BY r.contenido_id;
+JOIN contenidos c ON c.id = r.contenido_id AND c.estado = 'APROBADO'
+LEFT JOIN v_reacciones_por_resena x ON x.resena_id = r.id;
 
 CREATE VIEW v_ranking_base AS
-SELECT c.id AS contenido_id,
-       c.titulo,
-       COUNT(r.id) AS total_votos,
-       SUM(r.rating * POW(0.5, DATEDIFF(CURRENT_DATE, r.created_at) / 180))
-         / SUM(POW(0.5, DATEDIFF(CURRENT_DATE, r.created_at) / 180)) AS rating_ponderado,
-       COALESCE(x.likes, 0)    AS likes,
-       COALESCE(x.dislikes, 0) AS dislikes
-FROM contenidos c
-JOIN resenas r ON r.contenido_id = c.id
-LEFT JOIN v_reacciones_por_contenido x ON x.contenido_id = c.id
-WHERE c.estado = 'APROBADO'
-GROUP BY c.id, c.titulo, x.likes, x.dislikes;
+SELECT contenido_id,
+       COUNT(*) AS total_votos,
+       SUM(peso * rating) / SUM(peso) AS rating_ponderado
+FROM v_resenas_ranking
+GROUP BY contenido_id;
+
+CREATE VIEW v_ranking_global AS
+SELECT COALESCE(AVG(rating), 5.5) AS promedio_global
+FROM v_resenas_ranking;
