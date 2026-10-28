@@ -57,3 +57,19 @@ CREATE TABLE usuarios (
     CONSTRAINT fk_usuarios_rol FOREIGN KEY (rol_id)
         REFERENCES roles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- PERSONAS (una sola entidad: una persona puede actuar y dirigir)
+-- =========================================================================
+CREATE TABLE personas (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    biografia TEXT DEFAULT NULL,
+    fecha_nacimiento DATE DEFAULT NULL,
+    pais_id SMALLINT UNSIGNED DEFAULT NULL,
+    foto_url VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_personas_nombre (nombre),
+    CONSTRAINT fk_personas_pais FOREIGN KEY (pais_id)
+        REFERENCES paises(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
