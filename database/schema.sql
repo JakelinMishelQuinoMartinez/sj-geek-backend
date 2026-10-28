@@ -131,3 +131,20 @@ CREATE TABLE resenas (
     CONSTRAINT fk_resenas_usuario FOREIGN KEY (usuario_id)
         REFERENCES usuarios(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- REACCIONES (clave natural; sin id sustituto redundante)
+-- Los likes/dislikes NO se guardan como contador: se cuentan con COUNT/SUM.
+-- =========================================================================
+CREATE TABLE reaccion_resenas (
+    resena_id INT UNSIGNED NOT NULL,
+    usuario_id INT UNSIGNED NOT NULL,
+    tipo ENUM('LIKE', 'DISLIKE') NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (resena_id, usuario_id),
+    CONSTRAINT fk_reaccion_resena FOREIGN KEY (resena_id)
+        REFERENCES resenas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reaccion_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
