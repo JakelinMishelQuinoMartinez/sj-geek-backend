@@ -148,3 +148,22 @@ CREATE TABLE reaccion_resenas (
     CONSTRAINT fk_reaccion_usuario FOREIGN KEY (usuario_id)
         REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- =========================================================================
+-- ESTADÍSTICAS POR CONTENIDO (único lugar con datos derivados)
+-- =========================================================================
+CREATE TABLE contenido_estadisticas (
+    contenido_id INT UNSIGNED PRIMARY KEY,
+    total_votos INT UNSIGNED NOT NULL DEFAULT 0,
+    suma_ratings INT UNSIGNED NOT NULL DEFAULT 0,
+    total_recomendadas INT UNSIGNED NOT NULL DEFAULT 0,
+    rating_promedio DECIMAL(4,2) GENERATED ALWAYS AS
+        (IFNULL(ROUND(suma_ratings / NULLIF(total_votos, 0), 2), 0)) STORED,
+    porcentaje_fresco DECIMAL(5,2) GENERATED ALWAYS AS
+        (IFNULL(ROUND(100 * total_recomendadas / NULLIF(total_votos, 0), 2), 0)) STORED,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_est_recomendadas CHECK (total_recomendadas <= total_votos),
+    CONSTRAINT chk_est_suma CHECK (suma_ratings >= total_votos AND suma_ratings <= total_votos * 10),
+    CONSTRAINT fk_est_contenido FOREIGN KEY (contenido_id)
+        REFERENCES contenidos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
