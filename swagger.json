@@ -1,0 +1,36 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "S&J-GEEK API",
+    "version": "1.0.0",
+    "description": "API REST para catálogo, reseñas, reacciones y ranking de películas, series y anime."
+  },
+  "servers": [{ "url": "/api" }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/register": { "post": { "summary": "Registrar usuario", "security": [], "responses": { "201": { "description": "Usuario registrado" } } } },
+    "/auth/login": { "post": { "summary": "Iniciar sesión", "security": [], "responses": { "200": { "description": "Sesión creada" } } } },
+    "/auth/me": { "get": { "summary": "Usuario autenticado", "responses": { "200": { "description": "Usuario actual" } } } },
+    "/categorias": {
+      "get": { "summary": "Listar categorías", "security": [], "responses": { "200": { "description": "Listado" } } },
+      "post": { "summary": "Crear categoría", "responses": { "201": { "description": "Categoría creada" } } }
+    },
+    "/contenidos": {
+      "get": { "summary": "Listar contenidos aprobados", "security": [], "responses": { "200": { "description": "Listado" } } },
+      "post": { "summary": "Proponer o publicar contenido", "responses": { "201": { "description": "Contenido creado" } } }
+    },
+    "/contenidos/{id}": { "get": { "summary": "Obtener detalle", "security": [], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Contenido" } } } },
+    "/contenidos/pendientes": { "get": { "summary": "Listar propuestas pendientes", "responses": { "200": { "description": "Listado" } } } },
+    "/contenidos/{id}/estado": { "patch": { "summary": "Aprobar o rechazar contenido", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Estado actualizado" } } } },
+    "/resenas": { "post": { "summary": "Crear reseña", "responses": { "201": { "description": "Reseña creada" } } } },
+    "/resenas/{id}": { "put": { "summary": "Editar reseña", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Reseña actualizada" } } }, "delete": { "summary": "Eliminar reseña", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Reseña eliminada" } } } },
+    "/resenas/{id}/reaccion": { "post": { "summary": "Registrar like o dislike", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Reacción registrada" } } } },
+    "/ranking": { "get": { "summary": "Obtener ranking ponderado", "security": [], "responses": { "200": { "description": "Ranking" } } } },
+    "/upload": { "post": { "summary": "Subir imagen", "responses": { "201": { "description": "Archivo publicado" } } } }
+  }
+}
