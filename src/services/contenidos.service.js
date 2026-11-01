@@ -3,7 +3,7 @@ import { contenidoDto } from '../dtos/contenido.dto.js';
 function httpError(status, message) { const e = new Error(message); e.status = status; return e; }
 export class ContenidosService {
   async list(filters) { return (await contenidoRepository.findAll(filters)).map(contenidoDto); }
-  async get(id) { const row = await contenidoRepository.findApprovedById(id); 
+  async get(id) { const row = await contenidoRepository.findApprovedById(id);
     if (!row) throw httpError(404, 'Contenido no encontrado'); return contenidoDto(row); }
   async pending() { return (await contenidoRepository.findPending()).map(contenidoDto); }
   async create(data, user) {
