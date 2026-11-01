@@ -79,7 +79,11 @@ GitHub Pages solo publica HTML, CSS y JavaScript estático. El backend y MySQL d
 - `database`: esquema, semillas y migraciones.
 - `docs`: planeación del proyecto.
 
+## Estructura de la base de datos
+
+![Estructura de la base de datos](docs/diagrama.png)
+
 ## Frontend
-Repositorio separado: [sj-geek-frontend](../sj-geek-frontend).
+Repositorio separado: [sj-geek-frontend](https://github.com/JakelinMishelQuinoMartinez/sj-geek-frontend)
 
 Planeación: [Documento SCRUM](docs/Planificacion-Express.pdf).
