@@ -11,6 +11,8 @@ async function startServer() {
 
   app.listen(env.port, () => {
     console.log('Servidor S&J-GEEK corriendo en http://localhost:' + env.port);
+    console.log('Health: http://localhost:' + env.port + '/health');
+    console.log('Swagger: http://localhost:' + env.port + '/api-docs');
   });
 }
 

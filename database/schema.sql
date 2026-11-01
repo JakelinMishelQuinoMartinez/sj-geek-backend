@@ -85,6 +85,7 @@ CREATE TABLE contenidos (
     tipo_id TINYINT UNSIGNED NOT NULL,
     anio SMALLINT UNSIGNED NOT NULL,
     duracion_minutos SMALLINT UNSIGNED DEFAULT NULL,
+    clasificacion VARCHAR(3) NOT NULL DEFAULT '+13',
     imagen_url VARCHAR(255) DEFAULT NULL,
     estado ENUM('PENDIENTE', 'APROBADO', 'RECHAZADO') NOT NULL DEFAULT 'PENDIENTE',
     motivo_rechazo VARCHAR(255) DEFAULT NULL,     -- solo con estado RECHAZADO
@@ -235,7 +236,7 @@ CREATE TABLE contenido_directores (
 ) ENGINE=InnoDB;
 
 -- =========================================================================
--- VISTAS PARA EL RANKING (insumos de bayesianCalculator.js)
+-- VISTAS PARA EL CÁLCULO BAYESIANO DEL RANKING
 -- =========================================================================
 CREATE VIEW v_reacciones_por_resena AS
 SELECT rr.resena_id,
