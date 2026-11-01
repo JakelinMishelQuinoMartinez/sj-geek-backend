@@ -1,0 +1,389 @@
+{
+  "info": {
+    "_postman_id": "3e3c9c5d-f6aa-4b13-9f30-2d45bb93c001",
+    "name": "S&J-GEEK API",
+    "description": "Coleccion Postman para probar S&J-GEEK. Configure baseUrl y ejecutela en orden: Health, Registro/Login, contenido y reseña.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "contenidoId", "value": "1" },
+    { "key": "categoriaId", "value": "1" },
+    { "key": "resenaId", "value": "1" },
+    { "key": "userEmail", "value": "usuario.postman@example.com" },
+    { "key": "userPassword", "value": "12345678" },
+    { "key": "adminEmail", "value": "admin@example.com" },
+    { "key": "adminPassword", "value": "12345678" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Sistema",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api-docs", "host": ["{{baseUrl}}"], "path": ["api-docs"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.token) pm.collectionVariables.set('token', json.data.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Postman\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Iniciar sesion usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.token) pm.collectionVariables.set('token', json.data.token);",
+                  "if (json?.data?.user?.id) pm.collectionVariables.set('usuarioId', json.data.user.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Iniciar sesion administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.token) pm.collectionVariables.set('adminToken', json.data.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Usuario autenticado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] }
+          }
+        },
+        {
+          "name": "Crear categoria (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('categoriaId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Postman Test\",\n  \"descripcion\": \"Categoria creada desde Postman\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] }
+          }
+        },
+        {
+          "name": "Editar categoria (admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Postman Editada\",\n  \"descripcion\": \"Descripcion actualizada\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+          }
+        },
+        {
+          "name": "Eliminar categoria (admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contenidos",
+      "item": [
+        {
+          "name": "Listar publicados",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/contenidos?busqueda=&categoria=&tipo=&order=rating",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contenidos"],
+              "query": [
+                { "key": "busqueda", "value": "" },
+                { "key": "categoria", "value": "" },
+                { "key": "tipo", "value": "" },
+                { "key": "order", "value": "rating" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener detalle",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/contenidos/{{contenidoId}}", "host": ["{{baseUrl}}"], "path": ["api", "contenidos", "{{contenidoId}}"] }
+          }
+        },
+        {
+          "name": "Proponer contenido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('contenidoId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Contenido desde Postman\",\n  \"sinopsis\": \"Sinopsis de prueba creada para validar el flujo completo de propuestas.\",\n  \"categoria_id\": {{categoriaId}},\n  \"tipo_id\": 1,\n  \"anio\": 2026,\n  \"duracion_minutos\": 120,\n  \"clasificacion\": \"+13\",\n  \"imagen_url\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/contenidos", "host": ["{{baseUrl}}"], "path": ["api", "contenidos"] }
+          }
+        },
+        {
+          "name": "Pendientes (admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/contenidos/pendientes", "host": ["{{baseUrl}}"], "path": ["api", "contenidos", "pendientes"] }
+          }
+        },
+        {
+          "name": "Aprobar contenido (admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"APROBADO\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/contenidos/{{contenidoId}}/estado", "host": ["{{baseUrl}}"], "path": ["api", "contenidos", "{{contenidoId}}", "estado"] }
+          }
+        },
+        {
+          "name": "Rechazar contenido (admin)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"RECHAZADO\",\n  \"motivo_rechazo\": \"La informacion enviada es insuficiente\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/contenidos/{{contenidoId}}/estado", "host": ["{{baseUrl}}"], "path": ["api", "contenidos", "{{contenidoId}}", "estado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resenas y reacciones",
+      "item": [
+        {
+          "name": "Resenas por contenido",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/resenas/contenido/{{contenidoId}}", "host": ["{{baseUrl}}"], "path": ["api", "resenas", "contenido", "{{contenidoId}}"] }
+          }
+        },
+        {
+          "name": "Crear resena",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.id) pm.collectionVariables.set('resenaId', json.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contenido_id\": {{contenidoId}},\n  \"titulo\": \"Resena desde Postman\",\n  \"comentario\": \"Comentario de prueba para validar la persistencia y el ranking.\",\n  \"rating\": 8\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/resenas", "host": ["{{baseUrl}}"], "path": ["api", "resenas"] }
+          }
+        },
+        {
+          "name": "Editar resena",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Resena editada\",\n  \"comentario\": \"Comentario actualizado desde Postman.\",\n  \"rating\": 9\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/resenas/{{resenaId}}", "host": ["{{baseUrl}}"], "path": ["api", "resenas", "{{resenaId}}"] }
+          }
+        },
+        {
+          "name": "Dar like a resena ajena",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"LIKE\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/resenas/{{resenaId}}/reaccion", "host": ["{{baseUrl}}"], "path": ["api", "resenas", "{{resenaId}}", "reaccion"] }
+          }
+        },
+        {
+          "name": "Dar dislike a resena ajena",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"DISLIKE\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/resenas/{{resenaId}}/reaccion", "host": ["{{baseUrl}}"], "path": ["api", "resenas", "{{resenaId}}", "reaccion"] }
+          }
+        },
+        {
+          "name": "Eliminar resena",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/resenas/{{resenaId}}", "host": ["{{baseUrl}}"], "path": ["api", "resenas", "{{resenaId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ranking",
+      "item": [
+        {
+          "name": "Ranking de contenidos",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/ranking", "host": ["{{baseUrl}}"], "path": ["api", "ranking"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Archivos",
+      "item": [
+        {
+          "name": "Subir imagen",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/upload", "host": ["{{baseUrl}}"], "path": ["api", "upload"] }
+          }
+        }
+      ]
+    }
+  ]
+}
