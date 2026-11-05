@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { ok, fail } from '../utils/responseHandler.js';
+import resenaRepository from '../repositories/resena.repository.js';
 
 export class ApiRoutes {
   constructor() {
@@ -19,6 +20,11 @@ export class ApiRoutes {
     this.router.use('/contenidos', contenidosRoutes);
     this.router.use('/resenas', resenasRoutes);
     this.router.use('/ranking', rankingRoutes);
+    this.router.get('/historial', authenticate, async (req, res, next) => {
+      try {
+        return ok(res, await resenaRepository.findHistorial(req.user.id, req.query));
+      } catch (e) { next(e); }
+    });
   }
 
   configureUploads() {
