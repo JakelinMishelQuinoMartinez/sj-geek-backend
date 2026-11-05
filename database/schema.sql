@@ -270,3 +270,22 @@ GROUP BY contenido_id;
 CREATE VIEW v_ranking_global AS
 SELECT COALESCE(AVG(rating), 5.5) AS promedio_global
 FROM v_resenas_ranking;
+
+-- =========================================================================
+-- HISTORIAL DE ACTIVIDAD DE USUARIO
+-- Registra acciones relevantes (reseñas: creación, edición, eliminación)
+-- =========================================================================
+CREATE TABLE historial (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    tipo_accion ENUM('RESENA_CREADA', 'RESENA_EDITADA', 'RESENA_ELIMINADA') NOT NULL,
+    entidad_tipo VARCHAR(30) NOT NULL DEFAULT 'RESENA',
+    entidad_id INT UNSIGNED NOT NULL,
+    descripcion VARCHAR(255) DEFAULT NULL,
+    metadata JSON DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_historial_usuario_fecha (usuario_id, created_at),
+    INDEX idx_historial_usuario_tipo (usuario_id, tipo_accion),
+    CONSTRAINT fk_historial_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

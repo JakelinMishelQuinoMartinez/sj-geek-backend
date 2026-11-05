@@ -6,12 +6,12 @@ export class ResenasService {
   async update(id, data, user) {
     const review = await resenaRepository.findById(id);
     if (!review || (review.usuario_id !== user.id && user.rol !== 'ADMIN')) { const e = new Error('Reseña no encontrada o sin permiso'); e.status = 404; throw e; }
-    await resenaRepository.update(review, data);
+    await resenaRepository.update(review, data, user.id);
   }
   async remove(id, user) {
     const review = await resenaRepository.findById(id);
     if (!review || (review.usuario_id !== user.id && user.rol !== 'ADMIN')) { const e = new Error('Reseña no encontrada o sin permiso'); e.status = 404; throw e; }
-    await resenaRepository.remove(review);
+    await resenaRepository.remove(review, user.id);
   }
 }
 export default new ResenasService();
