@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { ok, fail } from '../utils/responseHandler.js';
+import reviewsRouter from './reviews.js';
 
 export class ApiRoutes {
   constructor() {
@@ -19,6 +20,7 @@ export class ApiRoutes {
     this.router.use('/contenidos', contenidosRoutes);
     this.router.use('/resenas', resenasRoutes);
     this.router.use('/ranking', rankingRoutes);
+    this.router.use(reviewsRouter);
   }
 
   configureUploads() {
