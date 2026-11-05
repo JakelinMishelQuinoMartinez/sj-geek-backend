@@ -1,4 +1,5 @@
-export function contenidoDto(row) {
+export class ContenidoDto {
+  transform(row) {
   if (!row) return null;
   return {
     ...row,
@@ -6,4 +7,7 @@ export function contenidoDto(row) {
     tipo: { id: row.tipo_id, nombre: row.tipo_nombre },
     autor: { id: row.usuario_id, nombre: row.autor_nombre }
   };
+  }
 }
+
+export const contenidoDto = row => new ContenidoDto().transform(row);

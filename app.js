@@ -9,33 +9,35 @@ import { notFoundHandler, errorHandler } from './src/middlewares/errorHandler.js
 import { limiter } from './src/middlewares/rateLimiter.js';
 import passport from './src/config/passport.js';
 
-const app = express();
-
-const allowedOrigins = env.frontendUrl.split(',').map(origin => origin.trim()).filter(Boolean);
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) return callback(null, true);
-    return callback(new Error('Origen CORS no permitido'));
+export class Application {
+  constructor() {
+    this.app = express();
+    this.configure();
   }
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
-app.use(limiter);
-app.use('/uploads', express.static(path.resolve('uploads')));
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
+  configure() {
+    const allowedOrigins = env.frontendUrl.split(',').map(origin => origin.trim()).filter(Boolean);
+    this.app.use(cors({
+      origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) return callback(null, true);
+        return callback(new Error('Origen CORS no permitido'));
+      }
+    }));
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(passport.initialize());
+    this.app.use(limiter);
+    this.app.use('/uploads', express.static(path.resolve('uploads')));
+    this.app.get('/health', (req, res) => res.json({ status: 'ok' }));
+    this.app.use('/api', apiRouter);
 
-app.use('/api', apiRouter);
-
-const swaggerPath = path.resolve('swagger.json');
-if (fs.existsSync(swaggerPath)) {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(fs.readFileSync(swaggerPath, 'utf8'))));
+    const swaggerPath = path.resolve('swagger.json');
+    if (fs.existsSync(swaggerPath)) {
+      this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(JSON.parse(fs.readFileSync(swaggerPath, 'utf8'))));
+    }
+    this.app.use(notFoundHandler);
+    this.app.use(errorHandler);
+  }
 }
 
-app.use(notFoundHandler);
-app.use(errorHandler);
-
-export default app;
+export default new Application().app;

@@ -11,9 +11,14 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-async function testConnection() {
+export class Database {
+  constructor(databasePool = pool) {
+    this.pool = databasePool;
+  }
+
+  async testConnection() {
   try {
-    const conn = await pool.getConnection();
+    const conn = await this.pool.getConnection();
     await conn.ping();
     conn.release();
     console.log('Conexion exitosa a MySQL');
@@ -22,6 +27,9 @@ async function testConnection() {
     console.error('Error conectando a MySQL: ' + error.message);
     return false;
   }
+  }
 }
 
-export { pool, testConnection };
+const database = new Database();
+export { pool };
+export const testConnection = () => database.testConnection();

@@ -1,3 +1,9 @@
 import passport from '../config/passport.js';
 
-export const authenticate = passport.authenticate('jwt', { session: false });
+export class AuthMiddleware {
+  constructor(passportInstance = passport) {
+    this.authenticate = passportInstance.authenticate('jwt', { session: false });
+  }
+}
+
+export const authenticate = new AuthMiddleware().authenticate;

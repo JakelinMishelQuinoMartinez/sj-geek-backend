@@ -10,25 +10,34 @@ import fs from 'fs';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { ok, fail } from '../utils/responseHandler.js';
 
-const router = Router();
+export class ApiRoutes {
+  constructor() {
+    this.router = Router();
+    this.configureUploads();
+    this.router.use('/auth', authRoutes);
+    this.router.use('/categorias', categoriasRoutes);
+    this.router.use('/contenidos', contenidosRoutes);
+    this.router.use('/resenas', resenasRoutes);
+    this.router.use('/ranking', rankingRoutes);
+  }
 
-router.use('/auth', authRoutes);
-router.use('/categorias', categoriasRoutes);
-router.use('/contenidos', contenidosRoutes);
-router.use('/resenas', resenasRoutes);
-router.use('/ranking', rankingRoutes);
+  configureUploads() {
+    fs.mkdirSync(path.resolve('uploads'), { recursive: true });
+    const storage = multer.diskStorage({
+      destination: path.resolve('uploads'),
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`)
+    });
+    const upload = multer({
+      storage,
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype))
+    });
 
-fs.mkdirSync(path.resolve('uploads'), { recursive: true });
-const storage = multer.diskStorage({
-  destination: path.resolve('uploads'),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`)
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) =>
-  cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) });
+    this.router.post('/upload', authenticate, upload.single('foto'), (req, res) => {
+      if (!req.file) return fail(res, 'Selecciona una imagen válida de máximo 5 MB', 400);
+      return ok(res, { url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` }, 'Imagen subida', 201);
+    });
+  }
+}
 
-router.post('/upload', authenticate, upload.single('foto'), (req, res) => {
-  if (!req.file) return fail(res, 'Selecciona una imagen válida de máximo 5 MB', 400);
-  return ok(res, { url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` }, 'Imagen subida', 201);
-});
-
-export default router;
+export default new ApiRoutes().router;

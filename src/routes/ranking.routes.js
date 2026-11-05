@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import * as controller from '../controllers/ranking.controller.js';
-const router = Router();
-router.get('/', controller.list);
-export default router;
+import controller from '../controllers/ranking.controller.js';
+export class RankingRoutes {
+  constructor() {
+    this.router = Router();
+    this.router.get('/', controller.list);
+  }
+}
+
+export default new RankingRoutes().router;

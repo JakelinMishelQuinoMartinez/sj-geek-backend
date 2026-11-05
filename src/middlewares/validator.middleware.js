@@ -1,13 +1,18 @@
 import { validationResult } from 'express-validator';
 
-export function validate(req, res, next) {
-  const result = validationResult(req);
-  if (!result.isEmpty()) {
-    return res.status(422).json({
-      status: 'error',
-      message: 'Los datos enviados no son válidos',
-      errors: result.array().map(error => ({ field: error.path, message: error.msg }))
-    });
+export class ValidatorMiddleware {
+  validate(req, res, next) {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      return res.status(422).json({
+        status: 'error',
+        message: 'Los datos enviados no son válidos',
+        errors: result.array().map(error => ({ field: error.path, message: error.msg }))
+      });
+    }
+    return next();
   }
-  return next();
 }
+
+const validatorMiddleware = new ValidatorMiddleware();
+export const validate = validatorMiddleware.validate.bind(validatorMiddleware);
