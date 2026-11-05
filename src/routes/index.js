@@ -10,6 +10,7 @@ import fs from 'fs';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { ok, fail } from '../utils/responseHandler.js';
 import resenaRepository from '../repositories/resena.repository.js';
+import reviewsRouter from './reviews.js';
 
 export class ApiRoutes {
   constructor() {
@@ -25,6 +26,7 @@ export class ApiRoutes {
         return ok(res, await resenaRepository.findHistorial(req.user.id, req.query));
       } catch (e) { next(e); }
     });
+    this.router.use(reviewsRouter);
   }
 
   configureUploads() {
